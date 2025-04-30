@@ -45,6 +45,7 @@
         <th onclick="ordenarPor('ticker')">Ticker</th>
         <th onclick="ordenarPor('nome')">Nome</th>
         <th onclick="ordenarPor('segmento')">Segmento</th>
+        <th onclick="ordenarPor('preco')">Preço (R$)</th>
         <th onclick="ordenarPor('pl')">P/L</th>
         <th onclick="ordenarPor('roe')">ROE (%)</th>
       </tr>
@@ -54,11 +55,11 @@
 
   <script>
     const dados = [
-      { ticker: 'PETR4', nome: 'Petrobras', segmento: 'Petróleo', pl: 3.5, roe: 28 },
-      { ticker: 'VALE3', nome: 'Vale', segmento: 'Mineração', pl: 4.8, roe: 22 },
-      { ticker: 'ITUB4', nome: 'Itaú', segmento: 'Financeiro', pl: 8.1, roe: 18 },
-      { ticker: 'WEGE3', nome: 'WEG', segmento: 'Industrial', pl: 25.4, roe: 22 },
-      { ticker: 'B3SA3', nome: 'B3', segmento: 'Financeiro', pl: 15.2, roe: 19 },
+      { ticker: 'PETR4', nome: 'Petrobras', segmento: 'Petróleo', preco: 38.45, pl: 3.5, roe: 28 },
+      { ticker: 'VALE3', nome: 'Vale', segmento: 'Mineração', preco: 65.20, pl: 4.8, roe: 22 },
+      { ticker: 'ITUB4', nome: 'Itaú', segmento: 'Financeiro', preco: 28.70, pl: 8.1, roe: 18 },
+      { ticker: 'WEGE3', nome: 'WEG', segmento: 'Industrial', preco: 38.00, pl: 25.4, roe: 22 },
+      { ticker: 'B3SA3', nome: 'B3', segmento: 'Financeiro', preco: 12.90, pl: 15.2, roe: 19 },
     ];
 
     let ordemAtual = { coluna: null, asc: true };
@@ -71,6 +72,7 @@
           <td>${dado.ticker}</td>
           <td>${dado.nome}</td>
           <td>${dado.segmento}</td>
+          <td>R$ ${dado.preco.toFixed(2)}</td>
           <td>${dado.pl}</td>
           <td>${dado.roe}</td>
         </tr>`;
