@@ -9,10 +9,12 @@
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
     th { background-color: #f4f4f4; }
     input[type="date"], input[type="number"] { width: 120px; padding: 4px; }
+    small { font-size: 0.8em; color: #666; display: block; }
   </style>
 </head>
 <body>
   <h1>Simulador de Ações da B3</h1>
+  <p><strong>Dica:</strong> Datas válidas para teste: <code>2024-01-01</code>, <code>2024-02-01</code>, <code>2024-03-01</code></p>
 
   <table id="tabelaAcoes">
     <thead>
@@ -20,7 +22,7 @@
         <th>Ticker</th>
         <th>Nome</th>
         <th>Preço Atual</th>
-        <th>Data de Aquisição</th>
+        <th>Data de Aquisição<br><small>(formato: yyyy-mm-dd)</small></th>
         <th>Preço na Data</th>
         <th>Quantidade</th>
         <th>Total Investido</th>
@@ -55,17 +57,16 @@
       }
     ];
 
-    function formatarDataISO(dataInput) {
-      const date = new Date(dataInput);
-      if (isNaN(date)) return '';
-      return date.toISOString().split('T')[0]; // yyyy-mm-dd
-    }
-
     function atualizarLinha(index) {
-      const data = formatarDataISO(document.getElementById(`data-${index}`).value);
-      const quantidade = parseFloat(document.getElementById(`qtd-${index}`).value);
-      const precoNaData = acoes[index].historico[data];
-      const precoAtual = acoes[index].precoAtual;
+      const dataInput = document.getElementById(`data-${index}`);
+      const qtdInput = document.getElementById(`qtd-${index}`);
+
+      const data = dataInput.value; // já vem em yyyy-mm-dd
+      const quantidade = parseFloat(qtdInput.value);
+      const acao = acoes[index];
+
+      const precoNaData = acao.historico[data];
+      const precoAtual = acao.precoAtual;
 
       const precoDataCell = document.getElementById(`preco-data-${index}`);
       const investidoCell = document.getElementById(`investido-${index}`);
@@ -99,9 +100,13 @@
           <td>${acao.ticker}</td>
           <td>${acao.nome}</td>
           <td>R$ ${acao.precoAtual.toFixed(2)}</td>
-          <td><input type="date" id="data-${i}" onchange="atualizarLinha(${i})"></td>
+          <td>
+            <input type="date" id="data-${i}" onchange="atualizarLinha(${i})">
+          </td>
           <td id="preco-data-${i}">-</td>
-          <td><input type="number" id="qtd-${i}" min="0" onchange="atualizarLinha(${i})"></td>
+          <td>
+            <input type="number" id="qtd-${i}" min="0" onchange="atualizarLinha(${i})">
+          </td>
           <td id="investido-${i}">-</td>
           <td id="atual-${i}">-</td>
           <td id="resultado-${i}">-</td>
