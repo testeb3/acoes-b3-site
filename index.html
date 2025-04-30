@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ações B3 - Simulador de Investimento</title>
+  <title>Simulador de Ações da B3</title>
   <style>
     body {
       font-family: sans-serif;
@@ -16,7 +16,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      margin-top: 20px;
     }
     th, td {
       padding: 6px;
@@ -25,9 +25,6 @@
     }
     th {
       background: #f4f4f4;
-    }
-    tr:hover {
-      background: #f9f9f9;
     }
     input[type="number"] {
       width: 80px;
@@ -91,6 +88,15 @@
           '2024-02-01': 27.50,
           '2024-03-01': 28.10,
         }
+      },
+      {
+        ticker: 'WEGE3', nome: 'WEG', segmento: 'Industrial',
+        precoAtual: 38.00,
+        historico: {
+          '2024-01-01': 34.90,
+          '2024-02-01': 37.10,
+          '2024-03-01': 37.80,
+        }
       }
     ];
 
@@ -139,7 +145,7 @@
       const atualCelula = document.getElementById(`atual-${index}`);
       const resultadoCelula = document.getElementById(`resultado-${index}`);
 
-      if (precoNaData && !isNaN(quantidade)) {
+      if (precoNaData !== undefined && !isNaN(quantidade)) {
         const totalInvestido = precoNaData * quantidade;
         const valorAtual = precoAtual * quantidade;
         const resultado = valorAtual - totalInvestido;
