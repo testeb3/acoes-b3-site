@@ -8,13 +8,20 @@
     table { border-collapse: collapse; width: 100%; margin-top: 20px; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
     th { background-color: #f4f4f4; }
-    input[type="date"], input[type="number"] { width: 120px; padding: 4px; }
-    small { font-size: 0.8em; color: #666; display: block; }
+    input[type="text"], input[type="number"] {
+      width: 120px;
+      padding: 4px;
+    }
+    small {
+      font-size: 10px;
+      color: #666;
+      display: block;
+    }
   </style>
 </head>
 <body>
   <h1>Simulador de Ações da B3</h1>
-  <p><strong>Dica:</strong> Datas válidas para teste: <code>2024-01-01</code>, <code>2024-02-01</code>, <code>2024-03-01</code></p>
+  <p><strong>Importante:</strong> Digite a data no formato <code>yyyy-mm-dd</code> (ex: 2024-01-01)</p>
 
   <table id="tabelaAcoes">
     <thead>
@@ -22,7 +29,7 @@
         <th>Ticker</th>
         <th>Nome</th>
         <th>Preço Atual</th>
-        <th>Data de Aquisição<br><small>(formato: yyyy-mm-dd)</small></th>
+        <th>Data de Aquisição</th>
         <th>Preço na Data</th>
         <th>Quantidade</th>
         <th>Total Investido</th>
@@ -58,11 +65,8 @@
     ];
 
     function atualizarLinha(index) {
-      const dataInput = document.getElementById(`data-${index}`);
-      const qtdInput = document.getElementById(`qtd-${index}`);
-
-      const data = dataInput.value; // já vem em yyyy-mm-dd
-      const quantidade = parseFloat(qtdInput.value);
+      const data = document.getElementById(`data-${index}`).value.trim();
+      const quantidade = parseFloat(document.getElementById(`qtd-${index}`).value);
       const acao = acoes[index];
 
       const precoNaData = acao.historico[data];
@@ -101,7 +105,8 @@
           <td>${acao.nome}</td>
           <td>R$ ${acao.precoAtual.toFixed(2)}</td>
           <td>
-            <input type="date" id="data-${i}" onchange="atualizarLinha(${i})">
+            <input type="text" id="data-${i}" placeholder="yyyy-mm-dd" onchange="atualizarLinha(${i})">
+            <small>Formato: yyyy-mm-dd</small>
           </td>
           <td id="preco-data-${i}">-</td>
           <td>
