@@ -3,35 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Simulador de Ações da B3</title>
+  <title>Simulador de Ações B3</title>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-    }
+    body { font-family: sans-serif; padding: 20px; }
     select, input[type="date"], input[type="number"] {
-      padding: 6px;
-      margin-bottom: 10px;
+      padding: 6px; margin-bottom: 10px;
     }
     table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
+      width: 100%; border-collapse: collapse; margin-top: 20px;
     }
     th, td {
-      padding: 6px;
-      border: 1px solid #ccc;
-      text-align: center;
+      padding: 6px; border: 1px solid #ccc; text-align: center;
     }
-    th {
-      background: #f4f4f4;
-    }
-    input[type="number"] {
-      width: 80px;
-    }
-    input[type="date"] {
-      width: 130px;
-    }
+    th { background: #f4f4f4; }
+    input[type="number"] { width: 80px; }
+    input[type="date"] { width: 130px; }
   </style>
 </head>
 <body>
@@ -88,17 +74,17 @@
           '2024-02-01': 27.50,
           '2024-03-01': 28.10,
         }
-      },
-      {
-        ticker: 'WEGE3', nome: 'WEG', segmento: 'Industrial',
-        precoAtual: 38.00,
-        historico: {
-          '2024-01-01': 34.90,
-          '2024-02-01': 37.10,
-          '2024-03-01': 37.80,
-        }
       }
     ];
+
+    function formatarData(inputDate) {
+      const dataObj = new Date(inputDate);
+      if (isNaN(dataObj)) return null;
+      const ano = dataObj.getFullYear();
+      const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
+      const dia = String(dataObj.getDate()).padStart(2, '0');
+      return `${ano}-${mes}-${dia}`;
+    }
 
     function popularSegmentos() {
       const segmentos = [...new Set(dados.map(d => d.segmento))];
@@ -133,11 +119,12 @@
     }
 
     function atualizarLinha(index) {
-      const data = document.getElementById(`data-${index}`).value;
+      const rawData = document.getElementById(`data-${index}`).value;
+      const dataFormatada = formatarData(rawData);
       const quantidade = parseFloat(document.getElementById(`quantidade-${index}`).value);
       const dado = dados[index];
 
-      const precoNaData = dado.historico[data];
+      const precoNaData = dataFormatada ? dado.historico[dataFormatada] : undefined;
       const precoAtual = dado.precoAtual;
 
       const precoCelula = document.getElementById(`preco-data-${index}`);
