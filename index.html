@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ações B3 - Simulador</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    select {
+      padding: 8px;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      cursor: pointer;
+      background: #f4f4f4;
+    }
+    tr:hover {
+      background: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ações da B3</h1>
+  <label for="segmentoSelect">Filtrar por segmento:</label>
+  <select id="segmentoSelect">
+    <option value="">Todos</option>
+  </select>
+
+  <table id="acoesTable">
+    <thead>
+      <tr>
+        <th onclick="ordenarPor('ticker')">Ticker</th>
+        <th onclick="ordenarPor('nome')">Nome</th>
+        <th onclick="ordenarPor('segmento')">Segmento</th>
+        <th onclick="ordenarPor('pl')">P/L</th>
+        <th onclick="ordenarPor('roe')">ROE (%)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const dados = [
+      { ticker: 'PETR4', nome: 'Petrobras', segmento: 'Petróleo', pl: 3.5, roe: 28 },
+      { ticker: 'VALE3', nome: 'Vale', segmento: 'Mineração', pl: 4.8, roe: 22 },
+      { ticker: 'ITUB4', nome: 'Itaú', segmento: 'Financeiro', pl: 8.1, roe: 18 },
+      { ticker: 'WEGE3', nome: 'WEG', segmento: 'Industrial', pl: 25.4, roe: 22 },
+      { ticker: 'B3SA3', nome: 'B3', segmento: 'Financeiro', pl: 15.2, roe: 19 },
+    ];
+
+    let ordemAtual = { coluna: null, asc: true };
+
+    function preencherTabela(dadosFiltrados) {
+      const corpo = document.querySelector('#acoesTable tbody');
+      corpo.innerHTML = '';
+      dadosFiltrados.forEach(dado => {
+        const row = `<tr>
+          <td>${dado.ticker}</td>
+          <td>${dado.nome}</td>
+          <td>${dado.segmento}</td>
+          <td>${dado.pl}</td>
+          <td>${dado.roe}</td>
+        </tr>`;
+        corpo.innerHTML += row;
+      });
+    }
+
+    function popularSegmentos() {
+      const segmentos = [...new Set(dados.map(d => d.segmento))];
+      const select = document.getElementById('segmentoSelect');
+      segmentos.forEach(seg => {
+        const opt = document.createElement('option');
+        opt.value = seg;
+        opt.textContent = seg;
+        select.appendChild(opt);
+      });
+    }
+
+    function filtrarPorSegmento() {
+      const filtro = document.getElementById('segmentoSelect').value;
+      const filtrados = filtro ? dados.filter(d => d.segmento === filtro) : dados;
+      preencherTabela(filtrados);
+    }
+
+    function ordenarPor(coluna) {
+      const asc = ordemAtual.coluna === coluna ? !ordemAtual.asc : true;
+      ordemAtual = { coluna, asc };
+      const filtro = document.getElementById('segmentoSelect').value;
+      const lista = filtro ? dados.filter(d => d.segmento === filtro) : [...dados];
+      lista.sort((a, b) => {
+        if (a[coluna] < b[coluna]) return asc ? -1 : 1;
+        if (a[coluna] > b[coluna]) return asc ? 1 : -1;
+        return 0;
+      });
+      preencherTabela(lista);
+    }
+
+    // Inicialização
+    popularSegmentos();
+    preencherTabela(dados);
+    document.getElementById('segmentoSelect').addEventListener('change', filtrarPorSegmento);
+  </script>
+</body>
+</html>
