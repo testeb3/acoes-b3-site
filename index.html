@@ -1,42 +1,27 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Simulador de Ações B3</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    select, input[type="date"], input[type="number"] {
-      padding: 6px; margin-bottom: 10px;
-    }
-    table {
-      width: 100%; border-collapse: collapse; margin-top: 20px;
-    }
-    th, td {
-      padding: 6px; border: 1px solid #ccc; text-align: center;
-    }
-    th { background: #f4f4f4; }
-    input[type="number"] { width: 80px; }
-    input[type="date"] { width: 130px; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #f4f4f4; }
+    input[type="date"], input[type="number"] { width: 120px; padding: 4px; }
   </style>
 </head>
 <body>
   <h1>Simulador de Ações da B3</h1>
 
-  <label for="segmentoSelect">Filtrar por segmento:</label>
-  <select id="segmentoSelect">
-    <option value="">Todos</option>
-  </select>
-
-  <table id="acoesTable">
+  <table id="tabelaAcoes">
     <thead>
       <tr>
         <th>Ticker</th>
         <th>Nome</th>
-        <th>Segmento</th>
         <th>Preço Atual</th>
-        <th>Data de aquisição</th>
-        <th>Preço na data</th>
+        <th>Data de Aquisição</th>
+        <th>Preço na Data</th>
         <th>Quantidade</th>
         <th>Total Investido</th>
         <th>Valor Atual</th>
@@ -47,9 +32,10 @@
   </table>
 
   <script>
-    const dados = [
+    const acoes = [
       {
-        ticker: 'PETR4', nome: 'Petrobras', segmento: 'Petróleo',
+        ticker: 'PETR4',
+        nome: 'Petrobras',
         precoAtual: 38.45,
         historico: {
           '2024-01-01': 27.30,
@@ -58,109 +44,73 @@
         }
       },
       {
-        ticker: 'VALE3', nome: 'Vale', segmento: 'Mineração',
+        ticker: 'VALE3',
+        nome: 'Vale',
         precoAtual: 65.20,
         historico: {
           '2024-01-01': 71.50,
           '2024-02-01': 66.80,
           '2024-03-01': 64.10,
         }
-      },
-      {
-        ticker: 'ITUB4', nome: 'Itaú', segmento: 'Financeiro',
-        precoAtual: 28.70,
-        historico: {
-          '2024-01-01': 26.20,
-          '2024-02-01': 27.50,
-          '2024-03-01': 28.10,
-        }
       }
     ];
 
-    function formatarData(inputDate) {
-      const dataObj = new Date(inputDate);
-      if (isNaN(dataObj)) return null;
-      const ano = dataObj.getFullYear();
-      const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
-      const dia = String(dataObj.getDate()).padStart(2, '0');
-      return `${ano}-${mes}-${dia}`;
-    }
-
-    function popularSegmentos() {
-      const segmentos = [...new Set(dados.map(d => d.segmento))];
-      const select = document.getElementById('segmentoSelect');
-      segmentos.forEach(seg => {
-        const opt = document.createElement('option');
-        opt.value = seg;
-        opt.textContent = seg;
-        select.appendChild(opt);
-      });
-    }
-
-    function preencherTabela(lista) {
-      const corpo = document.querySelector('#acoesTable tbody');
-      corpo.innerHTML = '';
-      lista.forEach((dado, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${dado.ticker}</td>
-          <td>${dado.nome}</td>
-          <td>${dado.segmento}</td>
-          <td>R$ ${dado.precoAtual.toFixed(2)}</td>
-          <td><input type="date" onchange="atualizarLinha(${index})" id="data-${index}"></td>
-          <td id="preco-data-${index}">-</td>
-          <td><input type="number" min="0" onchange="atualizarLinha(${index})" id="quantidade-${index}"></td>
-          <td id="investido-${index}">-</td>
-          <td id="atual-${index}">-</td>
-          <td id="resultado-${index}">-</td>
-        `;
-        corpo.appendChild(row);
-      });
+    function formatarDataISO(dataInput) {
+      const date = new Date(dataInput);
+      if (isNaN(date)) return '';
+      return date.toISOString().split('T')[0]; // yyyy-mm-dd
     }
 
     function atualizarLinha(index) {
-      const rawData = document.getElementById(`data-${index}`).value;
-      const dataFormatada = formatarData(rawData);
-      const quantidade = parseFloat(document.getElementById(`quantidade-${index}`).value);
-      const dado = dados[index];
+      const data = formatarDataISO(document.getElementById(`data-${index}`).value);
+      const quantidade = parseFloat(document.getElementById(`qtd-${index}`).value);
+      const precoNaData = acoes[index].historico[data];
+      const precoAtual = acoes[index].precoAtual;
 
-      const precoNaData = dataFormatada ? dado.historico[dataFormatada] : undefined;
-      const precoAtual = dado.precoAtual;
-
-      const precoCelula = document.getElementById(`preco-data-${index}`);
-      const investidoCelula = document.getElementById(`investido-${index}`);
-      const atualCelula = document.getElementById(`atual-${index}`);
-      const resultadoCelula = document.getElementById(`resultado-${index}`);
+      const precoDataCell = document.getElementById(`preco-data-${index}`);
+      const investidoCell = document.getElementById(`investido-${index}`);
+      const atualCell = document.getElementById(`atual-${index}`);
+      const resultadoCell = document.getElementById(`resultado-${index}`);
 
       if (precoNaData !== undefined && !isNaN(quantidade)) {
-        const totalInvestido = precoNaData * quantidade;
-        const valorAtual = precoAtual * quantidade;
-        const resultado = valorAtual - totalInvestido;
+        const investido = precoNaData * quantidade;
+        const atual = precoAtual * quantidade;
+        const resultado = atual - investido;
 
-        precoCelula.textContent = `R$ ${precoNaData.toFixed(2)}`;
-        investidoCelula.textContent = `R$ ${totalInvestido.toFixed(2)}`;
-        atualCelula.textContent = `R$ ${valorAtual.toFixed(2)}`;
-        resultadoCelula.textContent = `R$ ${resultado.toFixed(2)}`;
-        resultadoCelula.style.color = resultado >= 0 ? 'green' : 'red';
+        precoDataCell.textContent = `R$ ${precoNaData.toFixed(2)}`;
+        investidoCell.textContent = `R$ ${investido.toFixed(2)}`;
+        atualCell.textContent = `R$ ${atual.toFixed(2)}`;
+        resultadoCell.textContent = `R$ ${resultado.toFixed(2)}`;
+        resultadoCell.style.color = resultado >= 0 ? 'green' : 'red';
       } else {
-        precoCelula.textContent = 'Sem dados';
-        investidoCelula.textContent = '-';
-        atualCelula.textContent = '-';
-        resultadoCelula.textContent = '-';
-        resultadoCelula.style.color = 'black';
+        precoDataCell.textContent = 'Sem dados';
+        investidoCell.textContent = '-';
+        atualCell.textContent = '-';
+        resultadoCell.textContent = '-';
+        resultadoCell.style.color = 'black';
       }
     }
 
-    function filtrarTabela() {
-      const filtro = document.getElementById('segmentoSelect').value;
-      const lista = filtro ? dados.filter(d => d.segmento === filtro) : [...dados];
-      preencherTabela(lista);
+    function montarTabela() {
+      const tbody = document.querySelector('#tabelaAcoes tbody');
+      acoes.forEach((acao, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${acao.ticker}</td>
+          <td>${acao.nome}</td>
+          <td>R$ ${acao.precoAtual.toFixed(2)}</td>
+          <td><input type="date" id="data-${i}" onchange="atualizarLinha(${i})"></td>
+          <td id="preco-data-${i}">-</td>
+          <td><input type="number" id="qtd-${i}" min="0" onchange="atualizarLinha(${i})"></td>
+          <td id="investido-${i}">-</td>
+          <td id="atual-${i}">-</td>
+          <td id="resultado-${i}">-</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
-    // Inicialização
-    popularSegmentos();
-    preencherTabela(dados);
-    document.getElementById('segmentoSelect').addEventListener('change', filtrarTabela);
+    montarTabela();
   </script>
 </body>
 </html>
