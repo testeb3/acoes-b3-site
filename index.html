@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ações B3 - Preço por Data Individual</title>
+  <title>Ações B3 - Simulador de Investimento</title>
   <style>
     body {
       font-family: sans-serif;
       padding: 20px;
     }
-    select {
-      padding: 8px;
-      margin-bottom: 20px;
+    select, input[type="date"], input[type="number"] {
+      padding: 6px;
+      margin-bottom: 10px;
     }
     table {
       width: 100%;
@@ -19,9 +19,9 @@
       margin-top: 10px;
     }
     th, td {
-      padding: 8px;
+      padding: 6px;
       border: 1px solid #ccc;
-      text-align: left;
+      text-align: center;
     }
     th {
       background: #f4f4f4;
@@ -29,10 +29,16 @@
     tr:hover {
       background: #f9f9f9;
     }
+    input[type="number"] {
+      width: 80px;
+    }
+    input[type="date"] {
+      width: 130px;
+    }
   </style>
 </head>
 <body>
-  <h1>Ações da B3</h1>
+  <h1>Simulador de Ações da B3</h1>
 
   <label for="segmentoSelect">Filtrar por segmento:</label>
   <select id="segmentoSelect">
@@ -48,8 +54,10 @@
         <th>Preço Atual</th>
         <th>Data de aquisição</th>
         <th>Preço na data</th>
-        <th>P/L</th>
-        <th>ROE (%)</th>
+        <th>Quantidade</th>
+        <th>Total Investido</th>
+        <th>Valor Atual</th>
+        <th>Resultado</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -60,38 +68,29 @@
       {
         ticker: 'PETR4', nome: 'Petrobras', segmento: 'Petróleo',
         precoAtual: 38.45,
-        historico: { '2024-01-01': 27.30, '2024-02-01': 32.10 },
-        pl: 3.5, roe: 28
+        historico: {
+          '2024-01-01': 27.30,
+          '2024-02-01': 32.10,
+          '2024-03-01': 35.20,
+        }
       },
       {
         ticker: 'VALE3', nome: 'Vale', segmento: 'Mineração',
         precoAtual: 65.20,
-        historico: { '2024-01-01': 71.50, '2024-02-01': 66.80 },
-        pl: 4.8, roe: 22
+        historico: {
+          '2024-01-01': 71.50,
+          '2024-02-01': 66.80,
+          '2024-03-01': 64.10,
+        }
       },
       {
         ticker: 'ITUB4', nome: 'Itaú', segmento: 'Financeiro',
         precoAtual: 28.70,
-        historico: { '2024-01-01': 26.20, '2024-02-01': 27.50 },
-        pl: 8.1, roe: 18
-      },
-      {
-        ticker: 'WEGE3', nome: 'WEG', segmento: 'Industrial',
-        precoAtual: 38.00,
-        historico: { '2024-01-01': 34.90, '2024-02-01': 37.10 },
-        pl: 25.4, roe: 22
-      },
-      {
-        ticker: 'B3SA3', nome: 'B3', segmento: 'Financeiro',
-        precoAtual: 12.90,
-        historico: { '2024-01-01': 11.90, '2024-02-01': 12.20 },
-        pl: 15.2, roe: 19
-      },
-      {
-        ticker: 'MGLU3', nome: 'Magazine Luiza', segmento: 'Varejo',
-        precoAtual: 2.10,
-        historico: { '2024-01-01': 3.00, '2024-02-01': 2.50 },
-        pl: -12.1, roe: -8
+        historico: {
+          '2024-01-01': 26.20,
+          '2024-02-01': 27.50,
+          '2024-03-01': 28.10,
+        }
       }
     ];
 
@@ -110,31 +109,53 @@
       const corpo = document.querySelector('#acoesTable tbody');
       corpo.innerHTML = '';
       lista.forEach((dado, index) => {
-        const precoData = '-';
         const row = document.createElement('tr');
-
         row.innerHTML = `
           <td>${dado.ticker}</td>
           <td>${dado.nome}</td>
           <td>${dado.segmento}</td>
           <td>R$ ${dado.precoAtual.toFixed(2)}</td>
-          <td><input type="date" data-index="${index}" onchange="atualizarPrecoNaData(this)" /></td>
-          <td id="preco-data-${index}">${precoData}</td>
-          <td>${dado.pl}</td>
-          <td>${dado.roe}</td>
+          <td><input type="date" onchange="atualizarLinha(${index})" id="data-${index}"></td>
+          <td id="preco-data-${index}">-</td>
+          <td><input type="number" min="0" onchange="atualizarLinha(${index})" id="quantidade-${index}"></td>
+          <td id="investido-${index}">-</td>
+          <td id="atual-${index}">-</td>
+          <td id="resultado-${index}">-</td>
         `;
         corpo.appendChild(row);
       });
     }
 
-    function atualizarPrecoNaData(input) {
-      const index = input.dataset.index;
-      const data = input.value;
+    function atualizarLinha(index) {
+      const data = document.getElementById(`data-${index}`).value;
+      const quantidade = parseFloat(document.getElementById(`quantidade-${index}`).value);
       const dado = dados[index];
-      const preco = dado.historico[data];
-      const precoFormatado = preco ? `R$ ${preco.toFixed(2)}` : 'Sem dados';
+
+      const precoNaData = dado.historico[data];
+      const precoAtual = dado.precoAtual;
+
       const precoCelula = document.getElementById(`preco-data-${index}`);
-      precoCelula.textContent = precoFormatado;
+      const investidoCelula = document.getElementById(`investido-${index}`);
+      const atualCelula = document.getElementById(`atual-${index}`);
+      const resultadoCelula = document.getElementById(`resultado-${index}`);
+
+      if (precoNaData && !isNaN(quantidade)) {
+        const totalInvestido = precoNaData * quantidade;
+        const valorAtual = precoAtual * quantidade;
+        const resultado = valorAtual - totalInvestido;
+
+        precoCelula.textContent = `R$ ${precoNaData.toFixed(2)}`;
+        investidoCelula.textContent = `R$ ${totalInvestido.toFixed(2)}`;
+        atualCelula.textContent = `R$ ${valorAtual.toFixed(2)}`;
+        resultadoCelula.textContent = `R$ ${resultado.toFixed(2)}`;
+        resultadoCelula.style.color = resultado >= 0 ? 'green' : 'red';
+      } else {
+        precoCelula.textContent = 'Sem dados';
+        investidoCelula.textContent = '-';
+        atualCelula.textContent = '-';
+        resultadoCelula.textContent = '-';
+        resultadoCelula.style.color = 'black';
+      }
     }
 
     function filtrarTabela() {
@@ -146,7 +167,6 @@
     // Inicialização
     popularSegmentos();
     preencherTabela(dados);
-
     document.getElementById('segmentoSelect').addEventListener('change', filtrarTabela);
   </script>
 </body>
